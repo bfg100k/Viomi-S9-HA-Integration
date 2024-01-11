@@ -123,6 +123,6 @@ Create an invisible text input helper with entity id `input_text.viomi_s9_script
 - [Viomi S9 - Daily vacuum reminder](https://github.com/bfg100k/Viomi-S9-HA-Integration/blob/main/automations/daily_reminder.yaml) - Sends an actionable notification to parent's mobiles if the vacuum hasn't been run today.
 
 ### Scripts
-- [Show vacuum dashboard on Kitchen Display](https://github.com/bfg100k/Viomi-S9-HA-Integration/blob/main/scripts/cast_vacuum_dashboard.yaml) - Simple script to cast the vacuum dashboard to the kitchen display (i.e. Google Nest Hub). This script is used in 2 places -
+- [Show vacuum dashboard on Kitchen Display](https://github.com/bfg100k/Viomi-S9-HA-Integration/blob/main/scripts/cast_vacuum_dashboard.yaml) - Simple script to cast the vacuum dashboard to the kitchen display (i.e. Google Nest Hub). Note this script uses a custom REST endpoint to [bypass the authorization issue for non-admin users](https://community.home-assistant.io/t/should-service-cast-show-lovelace-view-be-admin-only/295057/4). This script is used in 2 places -
   1. in the `Viomi S9 - cleaning job started helper` 
   2. in a Google Home automation so I access the vacuum dashboard on kitchen display when I say "Hey Google, show vacuum dashboard".
