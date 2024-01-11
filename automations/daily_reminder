@@ -1,0 +1,56 @@
+alias: Viomi S9 - Daily vacuum reminder
+description: >-
+  Sends an actionable notification to parent's mobiles if the vacuum hasn't been
+  run today.
+trigger:
+  - platform: time
+    at: "13:00:00"
+condition:
+  - alias: Automation "Viomi S9 - cleaning job started helper" did NOT run today
+    condition: template
+    value_template: >
+      {% set last_t =
+      state_attr('automation.viomi_s9_update_script_helper_with_current_cleaning_job_type',
+      'last_triggered')  | default(as_datetime(0) ,1) %} {{ now().date() !=
+      as_local(last_t).date() }}
+action:
+  - alias: Set up variables for the actions
+    variables:
+      action_start: "{{ 'START_S9_' ~ context.id }}"
+      action_cancel: "{{ 'CANCEL_S9_' ~ context.id }}"
+  - alias: Ask to start the vacuum
+    service: notify.mobile_app_parents
+    data:
+      title: Vacuum hasn't been run today
+      message: >-
+        Gentle reminder that the floor has't been cleaned today! Do you want to
+        run the vacuum now?
+      data:
+        url: /dashboard-vacuum
+        actions:
+          - action: "{{ action_start }}"
+            title: Start Vacuum
+            url: /dashboard-vacuum
+          - action: "{{ action_cancel }}"
+            title: Cancel
+  - alias: Wait for a response
+    wait_for_trigger:
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "{{ action_start }}"
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "{{ action_cancel }}"
+  - alias: Perform the action
+    choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ wait.trigger.event.data.action == action_start }}"
+        sequence:
+          - service: vacuum.start
+            target:
+              entity_id: vacuum.viomi_v18_155a_robot_cleaner
+            data: {}
+mode: restart
