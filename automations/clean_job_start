@@ -1,0 +1,44 @@
+alias: Viomi S9 - cleaning job started helper
+description: >-
+  This is a helper automation to (1) track the cleaning job being performed
+  (i.e. vacuuming, vacuum & mop or mopping). The info is stored in a script
+  helper input_text entity and is used by the Viomi S9 - job complete and device
+  error notification automation. (2) show the vacuum dashboard on kitchen
+  display if its not playing anything else.
+trigger:
+  - platform: state
+    entity_id:
+      - vacuum.viomi_v18_155a_robot_cleaner
+    attribute: vacuum.status
+    to:
+      - 5
+      - 6
+      - 7
+condition: []
+action:
+  - service: input_text.set_value
+    target:
+      entity_id: input_text.viomi_s9_script_helper
+    data:
+      value: >
+        {% set clean_mode =
+        state_attr('vacuum.viomi_v18_155a_robot_cleaner','vacuum.status') %}{%
+        if clean_mode == 5 %}Vacuuming{% elif clean_mode == 6 %}Vacuum & Mop{%
+        elif clean_mode == 7 %}Mopping{% endif %}
+  - if:
+      - condition: or
+        conditions:
+          - condition: device
+            device_id: 81a145cd0356a655179b76473db5f0b2
+            domain: media_player
+            entity_id: c9e344ab6f7506ac4fca154cc8aaaa99
+            type: is_idle
+          - condition: device
+            device_id: 81a145cd0356a655179b76473db5f0b2
+            domain: media_player
+            entity_id: c9e344ab6f7506ac4fca154cc8aaaa99
+            type: is_off
+    then:
+      - service: script.show_vacuum_dashboard_on_kitchen_display
+        data: {}
+mode: single
