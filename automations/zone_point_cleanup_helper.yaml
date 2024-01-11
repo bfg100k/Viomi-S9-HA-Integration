@@ -1,0 +1,71 @@
+alias: Viomi S9 - zone & point cleanup helper
+description: >-
+  Automation script to start zone or point clean up. This script relies on a
+  helper input text entity to store the zone / point coordinates. Note that a
+  scaling factor of 1/1000 needs to be applied to the coordinates in order to
+  work with the Viomi S9 vacuum. Note also that for zone coordinates, the UI
+  format is (x1,y1,x2,y2) whereas the vacuum expects (x1,y1,x1,y2,x2,y2,x2,y1).
+  Note the use of raw JSON format for sending data with the
+  xiaomi_miot.set_miot_property to avoid brackets being inserted in the value
+  field (due to HA's auto type feature).
+trigger:
+  - platform: template
+    value_template: "{{ states('input_text.viomi_s9_script_helper').split(',')|count == 4 }}"
+    id: zone
+  - platform: template
+    value_template: "{{ states('input_text.viomi_s9_script_helper').split(',')|count == 2 }}"
+    id: point
+condition:
+  - condition: template
+    value_template: >-
+      {{ states('input_text.viomi_s9_script_helper')|regex_search('[^\d\.,-]')
+      == false }}
+action:
+  - variables:
+      scaled_coordinates: >
+        {{ states('input_text.viomi_s9_script_helper').split(',')|
+        map('multiply', 0.001)|join(',') }}
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - zone
+        sequence:
+          - service: xiaomi_miot.set_miot_property
+            data: |-
+              {% set x = scaled_coordinates %} {% set
+              zone_coordinates = x[0],x[1],x[0],x[3],x[2],x[3],x[2],x[1] %} {{
+              { 'entity_id': 'vacuum.viomi_v18_155a_robot_cleaner', 'siid': 6,
+              'piid': 2, 'value': zone_coordinates|join(','),
+               } }}
+          - service: xiaomi_miot.call_action
+            data:
+              throw: false
+              entity_id: vacuum.viomi_v18_155a_robot_cleaner
+              siid: 6
+              aiid: 5
+      - conditions:
+          - condition: trigger
+            id:
+              - point
+        sequence:
+          - service: xiaomi_miot.set_miot_property
+            data: |-
+              {{ {
+              'entity_id': 'vacuum.viomi_v18_155a_robot_cleaner',
+              'siid': 6,
+              'piid': 1,
+              'value': scaled_coordinates|string,
+               } }}
+          - service: xiaomi_miot.call_action
+            data:
+              throw: false
+              entity_id: vacuum.viomi_v18_155a_robot_cleaner
+              siid: 6
+              aiid: 1
+  - service: input_text.set_value
+    data:
+      value: ""
+    target:
+      entity_id: input_text.viomi_s9_script_helper
+mode: single
