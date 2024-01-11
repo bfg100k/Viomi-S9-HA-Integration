@@ -1,0 +1,119 @@
+alias: Viomi S9 - job complete and device error notifications
+description: >-
+  Forward notifications from the Viomi S9 vacuum. Note the use of helper
+  variable input_text.viomi_s9_script_helper to store the type of the last job
+  performed. V2 uses the MihomeMessageSensor entity for triggering notifications
+  which appears to be quicker and more accurate. Also note that because this
+  entity and the other S9 entities are updated at different times, do not
+  reference any of the other S9 entities here as the state may not be correct.
+  E.g. when this sensor triggers for error conditions, the entity
+  sensor.viomi_v18_155a_device_fault may not be updated with the error details
+  yet. As such we will need our own translation of the error codes (which may
+  not be a bad thing since the original messages in the system is pretty basic
+  and cryptic).
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.mi_1838149435_message
+condition:
+  - condition: state
+    entity_id: sensor.mi_1838149435_message
+    attribute: model
+    state: viomi.vacuum.v18
+  - condition: not
+    conditions:
+      - condition: template
+        value_template: "{{ trigger.from_state.state == 'unavailable' }}"
+action:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: sensor.mi_1838149435_message
+            attribute: title
+            state: Cleaning completed
+        sequence:
+          - service: notify.{{notify_target}}
+            data:
+              title: "[INFO] Viomi S9 Vacuum"
+              message: >
+                {{
+                states('input_text.viomi_s9_script_helper')|default('Cleaning')
+                }} completed - {{
+                state_attr('vacuum.viomi_v18_155a_robot_cleaner','viomi_vacuum.clean_area')
+                }}㎡ covered in {{
+                state_attr('vacuum.viomi_v18_155a_robot_cleaner','viomi_vacuum.clean_use_time')
+                // 60 }}mins. Battery currently at {{
+                state_attr('vacuum.viomi_v18_155a_robot_cleaner','battery_level')}}%.
+              data:
+                image: /api/camera_proxy/camera.xiaomi_cloud_map_extractor
+                url: /dashboard-vacuum/vacuum
+                clickAction: /dashboard-vacuum/vacuum
+          - if:
+              - condition: state
+                entity_id: media_player.nesthubb3c2
+                attribute: media_title
+                state: "dashboard-vacuum: Home"
+            then:
+              - service: media_player.turn_off
+                data: {}
+                target:
+                  device_id: 81a145cd0356a655179b76473db5f0b2
+      - conditions:
+          - condition: state
+            entity_id: sensor.mi_1838149435_message
+            attribute: title
+            state: Device error
+          - condition: not
+            conditions:
+              - condition: template
+                value_template: >-
+                  {{state_attr('sensor.mi_1838149435_message','event_data')[0].value
+                  == 14}}
+              - condition: template
+                value_template: >-
+                  {{state_attr('sensor.mi_1838149435_message','event_data')[0].value
+                  == 0}}
+        sequence:
+          - variables:
+              err_msg:
+                - No error
+                - Battery is low, returning to dock to charge.
+                - Low Bat Need Poweroff
+                - One or more wheels are trapped. Unable to continue.
+                - Collision Error
+                - Tile Do Task
+                - Lidar Point Error
+                - Front Wall Error
+                - Along Wall Error
+                - Mid Brush Error
+                - Side Brush Error
+                - Fan Error
+                - Lidar Cover
+                - Garbage Full
+                - Garbage Out
+                - Garbage Full Out
+                - Trapped
+                - Pick Up
+                - 2-in-1 dust compartment with water tank removed.
+                - unknown error
+                - Cannot Arrive
+                - Start From Forbid
+                - Drop
+                - Kit Water Pump
+                - Find Charge Failed
+                - Mop pad is not installed. Unable to start the mop function.
+                - Low Battery Can't Clean
+          - service: notify.{{notify_target}}
+            data:
+              title: "[ERROR] Viomi S9 Vacuum"
+              message: >-
+                {{
+                err_msg[state_attr('sensor.mi_1838149435_message','event_data')[0].value]
+                }}
+              data:
+                image: /api/camera_proxy/camera.xiaomi_cloud_map_extractor
+                url: /dashboard-vacuum/vacuum
+                clickAction: /dashboard-vacuum/vacuum
+variables:
+  notify_target: mobile_app_parents
+mode: single
