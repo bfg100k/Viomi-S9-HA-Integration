@@ -61,7 +61,10 @@ Speaking of automation, I also have an automation helper that will change the cl
 # How did I do it?
 
 ## Dependencies
-Xiaomi Miot Auto
-Xiaomi Cloud Map Extractor
-Xiaomi Vacuum Map Card
-Card Mod
+The following is the list of dependent components to get the above working. For details on how to set them up, please refer to the respective component documentation.
+### Backend
+- [Xiaomi Miot Auto](https://github.com/al-one/hass-xiaomi-miot) - This component is required for HA to communicate with the Viomi S9 Robot Vacuum.
+- [Xiaomi Cloud Map Extractor](https://github.com/PiotrMachowski/Home-Assistant-custom-components-Xiaomi-Cloud-Map-Extractor) - This component is required to extract the floor plan and retrieve the live view of the robot cleaning progress.
+### Frontend
+- [Lovelace Vacuum Map card](https://github.com/PiotrMachowski/lovelace-xiaomi-vacuum-map-card) - This is the main UI component for the vacuum dashboard.
+- [Card Mod 3](https://github.com/thomasloven/lovelace-card-mod) - This component is required to display the map and controls panels side-by-side in landscape view.
