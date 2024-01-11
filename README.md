@@ -50,7 +50,7 @@ Since HA is accessible via the web, I now have full access to the controls and v
 
 
 ### Monitor and control the robot vacuum from my Google Nest Hub
-For the non-tech-savy members of the household, they can access the same UI on the Google Nest Hub instead of the default basic vacuum UI. I have also created an automation helper that will show the vacuum dashboard on the Nest Hub (if its not playing other media) every time a cleaning job starts so we can monitor the cleaning process.
+For the non-tech-savvy members of the household, they can access the same UI on the Google Nest Hub instead of the default basic vacuum UI. I have also created an automation helper that will show the vacuum dashboard on the Nest Hub (if its not playing other media) every time a cleaning job starts so we can monitor the cleaning process.
 
 <img src="https://github.com/bfg100k/Viomi-S9-HA-Integration/assets/2188087/c019eafb-a7f8-42a4-8387-c9bcad8110c5" width="50%">
 
@@ -68,3 +68,59 @@ The following is the list of dependent components to get the above working. For 
 ### Frontend
 - [Lovelace Vacuum Map card](https://github.com/PiotrMachowski/lovelace-xiaomi-vacuum-map-card) - This is the main UI component for the vacuum dashboard.
 - [Card Mod 3](https://github.com/thomasloven/lovelace-card-mod) - This component is required to display the map and controls panels side-by-side in landscape view.
+
+## Configurations
+### Xiaomi Cloud Map Extractor
+The following configuration goes into the main HA configuration.yaml file.
+```
+camera:
+  - platform: xiaomi_cloud_map_extractor
+    host: !secret xiaomi_vacuum_host
+    token: !secret xiaomi_vacuum_token
+    username: !secret xiaomi_cloud_username
+    password: !secret xiaomi_cloud_password
+    colors:
+      color_path: [29, 47, 207] #dark blue
+    room_colors:
+      3: [57, 228, 237]
+    draw:
+      - charger
+      - cleaned_area
+      - goto_path
+      - ignored_obstacles
+      - ignored_obstacles_with_photo
+      - no_go_zones
+      - no_mopping_zones
+      - obstacles
+      - obstacles_with_photo
+      - path
+      - predicted_path
+      - vacuum_position
+      - virtual_walls
+      - zones
+    map_transformation:
+      scale: 2
+    attributes:
+      - calibration_points
+      - rooms
+```
+
+### Lovelace Vacuum Map card
+The configuration for the vacuum card is too long to list here so I've included it [here](https://github.com/bfg100k/Viomi-S9-HA-Integration/blob/main/viomi_s9_config.yaml)
+
+### Text Input Helper - input_text.viomi_s9_script_helper
+Create an invisible text input helper with entity id `input_text.viomi_s9_script_helper`. This field is used in a number of automations for
+1. Tracking the type of cleaning job (i.e. Vacuuming, Vacuum & Mop or Mopping)
+2. Holding the coordinates for Zone and Point cleaning (workaround as triggering the Zone and Point cleaning for the Viomi S9 vacuum requires multiple service calls and the Lovelace Vacuum Map card component is unable to handle that)
+
+### Automations
+- [Viomi S9 - cleaning job started helper](https://github.com/bfg100k/Viomi-S9-HA-Integration/blob/main/automations/clean_job_start.yaml) - This is a helper automation to 
+1. track the cleaning job being performed (i.e. vacuuming, vacuum & mop or mopping). The info is stored in the helper variable `input_text.viomi_s9_script_helper` and is used by the `Viomi S9 - job complete and device error notification` automation.
+2. show the vacuum dashboard on kitchen display if its not playing anything else.
+- [Viomi S9 - job complete and device error notifications](https://github.com/bfg100k/Viomi-S9-HA-Integration/blob/main/automations/job_complete_error.yaml) - This is a helper automation that forward notifications from the Viomi S9 vacuum. Note the use of the helper variable `input_text.viomi_s9_script_helper` to store the type of the last job performed. V2 uses the MihomeMessageSensor entity for triggering notifications which appears to be quicker and more accurate. Also note that because this entity and the other S9 entities are updated at different times, do not reference any of the other S9 entities here as the state may not be correct. E.g. when this sensor triggers for error conditions, the entity `sensor.viomi_v18_155a_device_fault` may not be updated with the error details yet. As such we will need our own translation of the error codes (which may not be a bad thing since the original messages in the system is pretty basic and cryptic).
+- [Viomi S9 - zone & point cleanup helper](https://github.com/bfg100k/Viomi-S9-HA-Integration/blob/main/automations/zone_point_cleanup_helper.yaml) - This is a helper automation script to start zone or point clean up. This script relies on the helper variable `input_text.viomi_s9_script_helper` to store the zone / point coordinates. Note that a scaling factor of 1/1000 needs to be applied to the coordinates in order to work with the Viomi S9 vacuum. Note also that for zone coordinates, the UI format is (x1,y1,x2,y2) whereas the vacuum expects (x1,y1,x1,y2,x2,y2,x2,y1). Note the use of raw JSON format for sending data with the `xiaomi_miot.set_miot_property` to avoid brackets being inserted in the value field (due to HA's auto type feature).
+- [Viomi S9 - change clean mode based on presence of mop pad](https://github.com/bfg100k/Viomi-S9-HA-Integration/blob/main/automations/change_clean_mode.yaml) - This is a helper automation script to automatically change the vacuum clean mode between "vacuum" and "mop" depending on whether the mop pad is installed or not. (installed = mop). Note we should not change the clean mode if cleaning is in progress (by checking for paused and cleaning states). To handle the change of mop pad in those states, add a trigger for when the vacuum comes out of those states and perform the change then.
+- [Viomi S9 - Daily vacuum reminder](https://github.com/bfg100k/Viomi-S9-HA-Integration/blob/main/automations/daily_reminder.yaml) - Sends an actionable notification to parent's mobiles if the vacuum hasn't been run today.
+
+### Scripts
+- [Show vacuum dashboard on Kitchen Display](https://github.com/bfg100k/Viomi-S9-HA-Integration/blob/main/scripts/cast_vacuum_dashboard.yaml) - Simple script to cast the vacuum dashboard to the kitchen display. This script is used in 2 places - (1) in the `Viomi S9 - cleaning job started helper` and (2) in a Google Home automation so I can cast the vacuum dashboard when I say "Hey Google, show vacuum dashboard".
