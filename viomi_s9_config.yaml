@@ -1,0 +1,453 @@
+type: custom:xiaomi-vacuum-map-card
+entity: vacuum.viomi_v18_155a_robot_cleaner
+vacuum_platform: al-one/hass-xiaomi-miot
+map_locked: true
+map_source:
+  camera: camera.xiaomi_cloud_map_extractor
+  crop:
+    top: 15
+    bottom: 20
+calibration_source:
+  camera: true
+icons:
+  - icon: mdi:play
+    conditions:
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        value_not: cleaning
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        value_not: error
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        value_not: returning
+    tooltip: Start
+    tap_action:
+      action: call-service
+      service: vacuum.start
+      service_data:
+        entity_id: vacuum.viomi_v18_155a_robot_cleaner
+  - icon: mdi:pause
+    conditions:
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        value_not: docked
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        value_not: idle
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        value_not: error
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        value_not: paused
+    tooltip: Pause
+    tap_action:
+      action: call-service
+      service: vacuum.pause
+      service_data:
+        entity_id: vacuum.viomi_v18_155a_robot_cleaner
+  - icon: mdi:stop
+    conditions:
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        value_not: docked
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        value_not: idle
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        value_not: error
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        value_not: paused
+    tooltip: Stop
+    tap_action:
+      action: call-service
+      service: vacuum.stop
+      service_data:
+        entity_id: vacuum.viomi_v18_155a_robot_cleaner
+  - icon: mdi:home-map-marker
+    conditions:
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        value_not: docked
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        value_not: returning
+    tooltip: Return to base
+    tap_action:
+      action: call-service
+      service: vacuum.return_to_base
+      service_data:
+        entity_id: vacuum.viomi_v18_155a_robot_cleaner
+  - icon: mdi:map-marker
+    tooltip: Locate
+    tap_action:
+      action: call-service
+      service: vacuum.locate
+      service_data:
+        entity_id: vacuum.viomi_v18_155a_robot_cleaner
+  - type: menu
+    menu_id: clean_mode
+    icon_id: clean_mode
+    entity: select.viomi_v18_155a_clean_mode
+    available_values_attribute: options
+    icon: mdi:vacuum
+    icon_mapping:
+      Vacuum: mdi:broom
+      Vacuum & Mop: mdi:vacuum
+      Mop: mdi:waves
+    conditions:
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        value_not: cleaning
+    tooltip: Change clean mode
+    tap_action:
+      action: call-service
+      service: select.select_option
+      service_data:
+        option: '[[value]]'
+        entity_id: '[[entity_id]]'
+  - menu_id: fan_speed
+    icon: mdi:fan-remove
+    label: Silent
+    conditions:
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        attribute: fan_speed
+        value: Silent
+      - entity: select.viomi_v18_155a_clean_mode
+        value_not: Mop
+    tooltip: Change fan speed
+    tap_action:
+      action: call-service
+      service: vacuum.set_fan_speed
+      service_data:
+        entity_id: vacuum.viomi_v18_155a_robot_cleaner
+        fan_speed: Silent
+  - menu_id: fan_speed
+    icon: mdi:fan-speed-1
+    label: Basic
+    conditions:
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        attribute: fan_speed
+        value: Basic
+      - entity: select.viomi_v18_155a_clean_mode
+        value_not: Mop
+    tooltip: Change fan speed
+    tap_action:
+      action: call-service
+      service: vacuum.set_fan_speed
+      service_data:
+        entity_id: vacuum.viomi_v18_155a_robot_cleaner
+        fan_speed: Basic
+  - menu_id: fan_speed
+    icon: mdi:fan-speed-2
+    label: Medium
+    conditions:
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        attribute: fan_speed
+        value: Medium
+      - entity: select.viomi_v18_155a_clean_mode
+        value_not: Mop
+    tooltip: Change fan speed
+    tap_action:
+      action: call-service
+      service: vacuum.set_fan_speed
+      service_data:
+        entity_id: vacuum.viomi_v18_155a_robot_cleaner
+        fan_speed: Medium
+  - menu_id: fan_speed
+    icon: mdi:fan-speed-3
+    label: Strong
+    conditions:
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        attribute: fan_speed
+        value: Strong
+      - entity: select.viomi_v18_155a_clean_mode
+        value_not: Mop
+    tooltip: Change fan speed
+    tap_action:
+      action: call-service
+      service: vacuum.set_fan_speed
+      service_data:
+        entity_id: vacuum.viomi_v18_155a_robot_cleaner
+        fan_speed: Strong
+  - icon: mdi:fan-alert
+    conditions:
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        attribute: fan_speed
+        value_not: Silent
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        attribute: fan_speed
+        value_not: Basic
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        attribute: fan_speed
+        value_not: Medium
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        attribute: fan_speed
+        value_not: Strong
+      - entity: select.viomi_v18_155a_clean_mode
+        value_not: Mop
+    tooltip: Change fan speed
+    tap_action:
+      action: call-service
+      service: vacuum.set_fan_speed
+      service_data:
+        entity_id: vacuum.viomi_v18_155a_robot_cleaner
+        fan_speed: Silent
+  - type: menu
+    menu_id: mop_style
+    icon_id: mop_style
+    entity: select.viomi_v18_155a_mopping_mode
+    available_values_attribute: options
+    icon: mdi:water
+    icon_mapping:
+      弓字形: mdi:alpha-s-circle
+      Y字形: mdi:alpha-y-circle
+    value_translation_keys:
+      弓字形: S-style
+      Y字形: Y-style
+    conditions:
+      - entity: select.viomi_v18_155a_clean_mode
+        value_not: Vacuum
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        value_not: cleaning
+    tooltip: Change mop style
+    tap_action:
+      action: call-service
+      service: select.select_option
+      service_data:
+        option: '[[value]]'
+        entity_id: '[[entity_id]]'
+  - type: menu
+    menu_id: water_level
+    icon_id: water_level
+    entity: select.viomi_v18_155a_water_grade
+    available_values_attribute: options
+    icon: mdi:water
+    icon_mapping:
+      1挡: mdi:water-minus
+      2挡: mdi:water
+      3挡: mdi:water-plus
+    value_translation_keys:
+      1挡: Less
+      2挡: Standard
+      3挡: More
+    conditions:
+      - entity: select.viomi_v18_155a_clean_mode
+        value_not: Vacuum
+    tooltip: Change water dispensing level
+    tap_action:
+      action: call-service
+      service: select.select_option
+      service_data:
+        option: '[[value]]'
+        entity_id: '[[entity_id]]'
+tiles:
+  - tile_id: battery_level
+    entity: vacuum.viomi_v18_155a_robot_cleaner
+    label: Battery
+    attribute: battery_level
+    icon_source: vacuum.viomi_v18_155a_robot_cleaner.attributes.battery_icon
+    unit: '%'
+  - tile_id: status
+    attribute: vacuum.status_desc
+    label: Status
+    icon: mdi:robot-vacuum
+    entity: vacuum.viomi_v18_155a_robot_cleaner
+    precision: 0
+  - entity: select.viomi_v18_155a_mopping_mode
+    label: Mop style
+    icon: mdi:gesture
+    icon_mapping:
+      弓字形: mdi:alpha-s-circle
+      Y字形: mdi:alpha-y-circle
+    conditions:
+      - entity: sensor.viomi_v18_155a_status
+        value: mopping
+    translations:
+      弓字形: S-style
+      Y字形: Y-style
+  - entity: sensor.viomi_v18_155a_device_fault
+    label: Error state
+    conditions:
+      - entity: vacuum.viomi_v18_155a_robot_cleaner
+        value: error
+  - entity: sensor.viomi_v18_155a_clean_area
+    label: Cleaned area
+    icon: mdi:texture-box
+  - entity: sensor.viomi_v18_155a_clean_time
+    label: Cleaning time
+  - entity: sensor.viomi_v18_155a_hypa_hours
+    label: Filter hours left
+    icon: mdi:air-filter
+  - entity: sensor.viomi_v18_155a_hypa_life
+    label: Filter life left
+    icon: mdi:air-filter
+  - entity: sensor.viomi_v18_155a_main_brush_hours
+    label: Main brush hours left
+    icon: mdi:broom
+  - entity: sensor.viomi_v18_155a_main_brush_life
+    label: Main brush life left
+    icon: mdi:broom
+  - entity: sensor.viomi_v18_155a_side_brush_hours
+    label: Side brush hours left
+    icon: mdi:broom
+  - entity: sensor.viomi_v18_155a_side_brush_life
+    label: Side brush life left
+    icon: mdi:broom
+map_modes:
+  - name: Rooms
+    icon: mdi:floor-plan
+    run_immediately: false
+    coordinates_rounding: true
+    coordinates_to_meters_divider: 1000
+    selection_type: ROOM
+    max_selections: 8
+    repeats_type: REPEAT
+    max_repeats: 3
+    service_call_schema:
+      service: xiaomi_miot.call_action
+      service_data:
+        entity_id: '[[entity_id]]'
+        siid: 4
+        aiid: 13
+        params:
+          - piid: 36
+            value: 1
+          - piid: 37
+            value: 1
+          - piid: 38
+            value: '[[selection_unwrapped]]'
+      force_params: true
+    predefined_selections:
+      - id: '1'
+        icon:
+          name: mdi:television
+          x: 1327
+          'y': -1376
+        label:
+          text: Living
+          x: 1327
+          'y': -1276
+          offset_y: 35
+      - id: '2'
+        icon:
+          name: mdi:bed-single
+          x: 5027
+          'y': -426
+        label:
+          text: Joel
+          x: 5027
+          'y': -326
+          offset_y: 35
+      - id: '3'
+        icon:
+          name: mdi:washing-machine
+          x: 577
+          'y': -9876
+        label:
+          text: Laundry
+          x: 577
+          'y': -9776
+          offset_y: 35
+      - id: '4'
+        icon:
+          name: mdi:bed-double
+          x: 5877
+          'y': -9026
+        label:
+          text: Boys
+          x: 5877
+          'y': -8926
+          offset_y: 35
+        outline: null
+      - id: '5'
+        icon:
+          name: mdi:room-service
+          x: 1377
+          'y': -4726
+        label:
+          text: Dining
+          x: 1377
+          'y': -4626
+          offset_y: 35
+      - id: '6'
+        icon:
+          name: mdi:fridge
+          x: 977
+          'y': -7676
+        label:
+          text: Kitchen
+          x: 977
+          'y': -7576
+          offset_y: 35
+      - id: '7'
+        icon:
+          name: mdi:map-marker
+          x: 4077
+          'y': -3626
+        label:
+          text: Corridor
+          x: 4077
+          'y': -3526
+          offset_y: 35
+      - id: '8'
+        icon:
+          name: mdi:coat-rack
+          x: 2677
+          'y': -8676
+        label:
+          text: Foyer
+          x: 2677
+          'y': -8576
+          offset_y: 35
+      - id: '9'
+        icon:
+          name: mdi:bed-queen
+          x: 6527
+          'y': -4626
+        label:
+          text: Master
+          x: 6527
+          'y': -4526
+          offset_y: 35
+    variables: {}
+  - name: Zone cleanup
+    icon: mdi:select-drag
+    run_immediately: false
+    coordinates_rounding: true
+    coordinates_to_meters_divider: 1000
+    selection_type: MANUAL_RECTANGLE
+    max_selections: 1
+    repeats_type: NONE
+    max_repeats: 1
+    service_call_schema:
+      service: input_text.set_value
+      service_data:
+        entity_id: input_text.viomi_s9_script_helper
+        value: '[[selection_unwrapped]]'
+    predefined_selections: []
+    variables: {}
+  - name: Point cleanup
+    icon: mdi:map-marker-radius
+    run_immediately: false
+    coordinates_rounding: true
+    coordinates_to_meters_divider: 1000
+    selection_type: MANUAL_POINT
+    max_selections: 1
+    repeats_type: NONE
+    max_repeats: 1
+    service_call_schema:
+      service: input_text.set_value
+      service_data:
+        entity_id: input_text.viomi_s9_script_helper
+        value: '[[selection_unwrapped]]'
+    predefined_selections: []
+    variables: {}
+card_mod:
+  style: |
+    ha-card {
+      --map-card-room-label-color: white;
+      display: flex !important;
+      align-items: stretch;
+      flex-wrap: wrap;
+      justify-content: space-evenly;
+    }
+    .map-wrapper {
+      flex-grow: 1;
+      max-width: 720px;
+      min-width: 50%;
+    }
+    .controls-wrapper {
+      flex-grow: 1;
+      max-width: 460px;
+    }
+additional_presets: []
