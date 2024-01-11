@@ -1,0 +1,9 @@
+alias: Show vacuum dashboard on Kitchen Display
+sequence:
+  - service: rest_command.privileged_show_lovelace_view
+    data:
+      entity_id: media_player.nesthubb3c2
+      dashboard_path: dashboard-vacuum
+      view_path: vacuum
+mode: single
+icon: mdi:cast
