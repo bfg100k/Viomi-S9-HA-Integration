@@ -78,7 +78,7 @@ icons:
   - type: menu
     menu_id: clean_mode
     icon_id: clean_mode
-    entity: select.viomi_v18_155a_clean_mode
+    entity: select.viomi_v18_155a_wide_dynamic_range_mode
     available_values_attribute: options
     icon: mdi:vacuum
     icon_mapping:
@@ -102,7 +102,7 @@ icons:
       - entity: vacuum.viomi_v18_155a_robot_cleaner
         attribute: fan_speed
         value: Silent
-      - entity: select.viomi_v18_155a_clean_mode
+      - entity: select.viomi_v18_155a_wide_dynamic_range_mode
         value_not: Mop
     tooltip: Change fan speed
     tap_action:
@@ -118,7 +118,7 @@ icons:
       - entity: vacuum.viomi_v18_155a_robot_cleaner
         attribute: fan_speed
         value: Basic
-      - entity: select.viomi_v18_155a_clean_mode
+      - entity: select.viomi_v18_155a_wide_dynamic_range_mode
         value_not: Mop
     tooltip: Change fan speed
     tap_action:
@@ -134,7 +134,7 @@ icons:
       - entity: vacuum.viomi_v18_155a_robot_cleaner
         attribute: fan_speed
         value: Medium
-      - entity: select.viomi_v18_155a_clean_mode
+      - entity: select.viomi_v18_155a_wide_dynamic_range_mode
         value_not: Mop
     tooltip: Change fan speed
     tap_action:
@@ -150,7 +150,7 @@ icons:
       - entity: vacuum.viomi_v18_155a_robot_cleaner
         attribute: fan_speed
         value: Strong
-      - entity: select.viomi_v18_155a_clean_mode
+      - entity: select.viomi_v18_155a_wide_dynamic_range_mode
         value_not: Mop
     tooltip: Change fan speed
     tap_action:
@@ -173,7 +173,7 @@ icons:
       - entity: vacuum.viomi_v18_155a_robot_cleaner
         attribute: fan_speed
         value_not: Strong
-      - entity: select.viomi_v18_155a_clean_mode
+      - entity: select.viomi_v18_155a_wide_dynamic_range_mode
         value_not: Mop
     tooltip: Change fan speed
     tap_action:
@@ -185,7 +185,7 @@ icons:
   - type: menu
     menu_id: mop_style
     icon_id: mop_style
-    entity: select.viomi_v18_155a_mopping_mode
+    entity: select.viomi_v18_155a_mop_route
     available_values_attribute: options
     icon: mdi:water
     icon_mapping:
@@ -195,7 +195,7 @@ icons:
       弓字形: S-style
       Y字形: Y-style
     conditions:
-      - entity: select.viomi_v18_155a_clean_mode
+      - entity: select.viomi_v18_155a_wide_dynamic_range_mode
         value_not: Vacuum
       - entity: vacuum.viomi_v18_155a_robot_cleaner
         value_not: cleaning
@@ -221,7 +221,7 @@ icons:
       2挡: Standard
       3挡: More
     conditions:
-      - entity: select.viomi_v18_155a_clean_mode
+      - entity: select.viomi_v18_155a_wide_dynamic_range_mode
         value_not: Vacuum
     tooltip: Change water dispensing level
     tap_action:
@@ -243,7 +243,7 @@ tiles:
     icon: mdi:robot-vacuum
     entity: vacuum.viomi_v18_155a_robot_cleaner
     precision: 0
-  - entity: select.viomi_v18_155a_mopping_mode
+  - entity: select.viomi_v18_155a_mop_route
     label: Mop style
     icon: mdi:gesture
     icon_mapping:
@@ -263,7 +263,7 @@ tiles:
   - entity: sensor.viomi_v18_155a_clean_area
     label: Cleaned area
     icon: mdi:texture-box
-  - entity: sensor.viomi_v18_155a_clean_time
+  - entity: sensor.viomi_v18_155a_clean_use_time
     label: Cleaning time
   - entity: sensor.viomi_v18_155a_hypa_hours
     label: Filter hours left
